@@ -4,7 +4,7 @@
 // Import necessary Firebase Auth functions for modular SDK
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 // Import Realtime Database functions
-import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+import { getDatabase, ref, get, set, onValue, child } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -28,18 +28,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentUser = null; // To store the current authenticated user
     let currentUsername = 'Guest'; // Default username
+    let currentPlayerColor = '#ffc107'; // Default player color (gold)
+
+    // Object to store all players currently in the game (including self)
+    const players = {};
 
     // Player object for the game canvas
     const player = {
         x: gameCanvas.width / 2, // Start in the center of the canvas
         y: gameCanvas.height / 2,
         radius: 15, // Size of the player avatar
-        color: '#ffc107', // Gold color for the player
-        speed: 4, // Pixels per frame (slightly increased for smoother feel)
+        color: currentPlayerColor,
+        speed: 4, // Pixels per frame
         targetX: gameCanvas.width / 2, // Initial target is current position
         targetY: gameCanvas.height / 2,
         isMoving: false // Track if the player is currently moving
     };
+
+    // Reference to the players node in Realtime Database (e.g., /game_state/players)
+    // This will hold the positions and data of all active players
+    let playersRef = null; // Will be set after server selection
 
     /**
      * Displays a message to the user in the server-message div.
@@ -63,8 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
     async function getUsername(uid) {
         try {
             // Reference to the user's data in the Realtime Database: /users/{uid}/username
-            const dbRef = ref(database); // Get a reference to the root of your database
-            const snapshot = await get(child(dbRef, `users/${uid}/username`)); // Get the username field
+            const userDbRef = ref(database); // Get a reference to the root of your database
+            const snapshot = await get(child(userDbRef, `users/${uid}/username`)); // Get the username field
             if (snapshot.exists()) {
                 return snapshot.val(); // Return the value of the username
             } else {
@@ -103,6 +111,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle Logout
     logoutButton.addEventListener('click', async () => {
         try {
+            // Remove player data from Realtime DB on logout
+            if (currentUser && playersRef) {
+                await set(child(playersRef, currentUser.uid), null); // Remove player's data
+            }
             await signOut(auth);
             // onAuthStateChanged will handle the redirect
         } catch (error) {
@@ -113,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Handle Server Selection
     serverButtons.forEach(button => {
-        button.addEventListener('click', (event) => {
+        button.addEventListener('click', async (event) => { // Added async here
             if (!currentUser) {
                 displayServerMessage('Please log in first.', true);
                 return;
@@ -123,8 +135,12 @@ document.addEventListener('DOMContentLoaded', () => {
             displayServerMessage(`Connecting to ${selectedServer} server...`, false);
             console.log(`User ${currentUser.uid} selected server: ${selectedServer}`);
 
+            // Set the Realtime DB reference for the selected server's players
+            // Example path: /servers/Orion/players/{uid}
+            playersRef = ref(database, `servers/${selectedServer}/players`);
+
             // Simulate connection delay or actual connection logic
-            setTimeout(() => {
+            setTimeout(async () => { // Added async here
                 // Hide server selection and show main area
                 serverSelectionDiv.classList.add('hidden');
                 mainAreaDiv.classList.remove('hidden');
@@ -133,6 +149,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Initialize canvas size and draw for the first time
                 resizeCanvas();
+
+                // Set initial player position in Realtime DB when joining
+                player.x = gameCanvas.width / 2;
+                player.y = gameCanvas.height / 2;
+                player.targetX = player.x;
+                player.targetY = player.y;
+
+                if (currentUser) {
+                    await set(child(playersRef, currentUser.uid), {
+                        x: player.x,
+                        y: player.y,
+                        username: currentUsername,
+                        color: currentPlayerColor // Save player's color
+                    });
+                }
+
+
+                // Listen for changes in other players' positions
+                onValue(playersRef, (snapshot) => {
+                    const allPlayersData = snapshot.val();
+                    // Clear existing players, then repopulate
+                    for (const playerId in players) {
+                        delete players[playerId];
+                    }
+
+                    if (allPlayersData) {
+                        for (const uid in allPlayersData) {
+                            if (uid !== currentUser.uid) { // Don't track self as an "other player"
+                                players[uid] = allPlayersData[uid];
+                            }
+                        }
+                    }
+                    // The game loop will redraw everything
+                });
+
+
                 // Start the game loop when entering the main area
                 requestAnimationFrame(gameLoop);
             }, 1500); // Simulate loading
@@ -164,32 +216,43 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial call will be made after server selection
 
     /**
-     * Draws the player avatar on the canvas.
+     * Draws a single player avatar on the canvas.
+     * @param {object} p The player object to draw.
+     * @param {string} name The username to display.
+     * @param {string} color The color of the avatar.
      */
-    function drawPlayer() {
+    function drawAvatar(p, name, color) {
         ctx.beginPath();
-        ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-        ctx.fillStyle = player.color;
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = color;
         ctx.fill();
         ctx.closePath();
 
         // Draw username above player
         ctx.fillStyle = 'white';
-        ctx.font = 'bold 14px Inter, sans-serif'; // Added bold and sans-serif fallback
+        ctx.font = 'bold 14px Inter, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(currentUsername, player.x, player.y - player.radius - 8); // Adjusted position
+        ctx.fillText(name, p.x, p.y - p.radius - 8);
     }
 
     /**
-     * Clears the canvas and redraws all game elements.
+     * Clears the canvas and redraws all game elements (local player and other players).
      */
     function drawGame() {
         ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height); // Clear the entire canvas
-        drawPlayer();
+
+        // Draw other players
+        for (const uid in players) {
+            const otherPlayer = players[uid];
+            drawAvatar({ x: otherPlayer.x, y: otherPlayer.y, radius: player.radius }, otherPlayer.username, otherPlayer.color);
+        }
+
+        // Draw local player (always on top)
+        drawAvatar(player, currentUsername, player.color);
     }
 
     /**
-     * Updates game state (e.g., player movement).
+     * Updates game state (e.g., local player movement) and synchronizes with Realtime DB.
      */
     function updateGame() {
         const dx = player.targetX - player.x;
@@ -200,6 +263,19 @@ document.addEventListener('DOMContentLoaded', () => {
             player.x += (dx / distance) * player.speed;
             player.y += (dy / distance) * player.speed;
             player.isMoving = true;
+
+            // Update player's position in Realtime DB if they are moving
+            // Use set() for full updates, this will overwrite previous state for this user
+            if (currentUser && playersRef) {
+                // Throttle this in a real game to avoid too many writes!
+                set(child(playersRef, currentUser.uid), {
+                    x: player.x,
+                    y: player.y,
+                    username: currentUsername,
+                    color: currentPlayerColor
+                });
+            }
+
         } else {
             player.x = player.targetX; // Snap to target if very close
             player.y = player.targetY;
@@ -211,8 +287,8 @@ document.addEventListener('DOMContentLoaded', () => {
      * The main game loop.
      */
     function gameLoop() {
-        updateGame(); // Update positions, etc.
-        drawGame();   // Redraw everything
+        updateGame(); // Update local player position and sync to DB
+        drawGame();   // Redraw everything (local player and others)
         requestAnimationFrame(gameLoop); // Request next frame
     }
 
