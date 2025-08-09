@@ -78,7 +78,8 @@
         // Import the functions you need from the Firebase SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Import Realtime Database functions instead of Firestore
+        import { getDatabase } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
         // Your web app's Firebase configuration (same as index.html)
         const firebaseConfig = {
@@ -94,12 +95,12 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
+        const database = getDatabase(app); // Initialize Realtime Database
 
-        // Make auth and db globally accessible for game.js
+        // Make auth and database globally accessible for game.js
         window.firebaseApp = app;
         window.firebaseAuth = auth;
-        window.firebaseDb = db;
+        window.firebaseRealtimeDb = database; // Expose Realtime Database instance
     </script>
     <!-- Link to your game-specific JavaScript file -->
     <script src="game.js" type="module"></script>
