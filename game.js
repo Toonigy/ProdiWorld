@@ -1,9 +1,11 @@
 // game.js
 // This script assumes Firebase has been initialized in game.html and its instances are exposed globally.
 
-// Import necessary Firebase Auth and Firestore functions for modular SDK
+// Import necessary Firebase Auth functions for modular SDK
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+// Import Realtime Database functions
+import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const serverSelectionDiv = document.getElementById('server-selection');
@@ -20,9 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameCanvas = document.getElementById('game-canvas');
     const ctx = gameCanvas.getContext('2d');
 
-    // Get Firebase auth and db instances from the global window object
+    // Get Firebase auth and Realtime Database instances from the global window object
     const auth = window.firebaseAuth;
-    const db = window.firebaseDb;
+    const database = window.firebaseRealtimeDb; // Now using Realtime Database instance
 
     let currentUser = null; // To store the current authenticated user
     let currentUsername = 'Guest'; // Default username
@@ -54,22 +56,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Fetches the user's username from Firestore.
+     * Fetches the user's username from Realtime Database.
      * @param {string} uid The user's UID.
      * @returns {Promise<string|null>} The username or null if not found/error.
      */
     async function getUsername(uid) {
         try {
-            const userDocRef = doc(db, 'users', uid);
-            const userDocSnap = await getDoc(userDocRef);
-            if (userDocSnap.exists()) {
-                return userDocSnap.data().username;
+            // Reference to the user's data in the Realtime Database: /users/{uid}/username
+            const dbRef = ref(database); // Get a reference to the root of your database
+            const snapshot = await get(child(dbRef, `users/${uid}/username`)); // Get the username field
+            if (snapshot.exists()) {
+                return snapshot.val(); // Return the value of the username
             } else {
-                console.warn("No user data found for UID:", uid);
+                console.warn("No username data found for UID:", uid);
                 return null;
             }
         } catch (error) {
-            console.error("Error fetching user data:", error);
+            console.error("Error fetching username from Realtime Database:", error);
             return null;
         }
     }
