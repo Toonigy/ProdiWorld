@@ -1,6 +1,9 @@
 // script.js
 // This script assumes Firebase has been initialized in index.html and its instances are exposed globally.
 
+// Import necessary Firebase Auth functions for modular SDK
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
 // Ensure the DOM is fully loaded before attaching event listeners
 document.addEventListener('DOMContentLoaded', () => {
     // Get references to HTML elements
@@ -11,7 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const authMessage = document.getElementById('auth-message');
 
     // Get Firebase auth instance from the global window object (set in index.html)
-    const auth = window.firebaseAuth; // Correctly referencing the 'auth' instance
+    // This 'auth' variable is the Auth service instance.
+    const auth = window.firebaseAuth;
 
     /**
      * Displays a message to the user in the auth-message div.
@@ -42,8 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
         displayMessage('Signing up...', false); // Show loading message
 
         try {
-            // Create user with email and password using the 'auth' instance
-            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+            // Correct way to use createUserWithEmailAndPassword with modular SDK
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             displayMessage(`Signup successful! Welcome, ${user.email}. You can now log in.`, false);
             // Optionally clear fields or redirect
@@ -87,8 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
         displayMessage('Logging in...', false); // Show loading message
 
         try {
-            // Sign in user with email and password using the 'auth' instance
-            const userCredential = await auth.signInWithEmailAndPassword(email, password);
+            // Correct way to use signInWithEmailAndPassword with modular SDK
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             displayMessage(`Login successful! Welcome back, ${user.email}.`, false);
             console.log('User logged in:', user);
