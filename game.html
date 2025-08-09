@@ -14,6 +14,18 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+        /* Ensure canvas fits its container responsively */
+        #game-canvas {
+            background-color: #1a202c; /* Dark background for canvas */
+            display: block; /* Remove extra space below canvas */
+            max-width: 100%;
+            height: auto;
+            border: 2px solid #8b5cf6; /* Purple border for the game canvas */
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            margin: 20px auto; /* Center the canvas */
+            cursor: pointer; /* Indicate it's clickable */
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 to-black min-h-screen flex flex-col items-center justify-center p-4">
@@ -51,8 +63,10 @@
     <!-- Main Game Area (initially hidden) -->
     <div id="main-area" class="hidden bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-2xl shadow-xl p-8 md:p-12 w-full max-w-4xl border border-gray-700 text-center">
         <h2 class="text-3xl font-bold text-white mb-4">Welcome to <span id="selected-server-name" class="text-purple-400"></span>!</h2>
-        <p class="text-gray-300 text-lg">This is where your epic adventure begins.</p>
-        <p class="text-gray-400 mt-4">More game content will go here (world map, character stats, chat, etc.)</p>
+        <p class="text-gray-300 text-lg">Click anywhere on the game canvas to move your avatar!</p>
+        <div class="mt-8">
+            <canvas id="game-canvas" width="800" height="600"></canvas>
+        </div>
         <div class="mt-8 text-white text-left">
             <p>Your User ID: <span id="display-user-id" class="font-mono text-sm text-yellow-300 break-all"></span></p>
             <p>Your Username: <span id="display-username" class="font-medium text-lg text-green-300"></span></p>
