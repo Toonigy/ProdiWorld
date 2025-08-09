@@ -59,8 +59,9 @@
         // Import the functions you need from the Firebase SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        // Import Firestore functions
-        import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Import Realtime Database functions
+        import { getDatabase } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -76,12 +77,12 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app); // Initialize Firestore
+        const database = getDatabase(app); // Initialize Realtime Database
 
-        // Make auth and db globally accessible for script.js
+        // Make auth and database globally accessible for script.js
         window.firebaseApp = app;
         window.firebaseAuth = auth;
-        window.firebaseDb = db;
+        window.firebaseRealtimeDb = database; // Expose Realtime Database instance
     </script>
     <!-- Link to your JavaScript file -->
     <script src="script.js" type="module"></script>
