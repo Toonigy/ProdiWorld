@@ -1,0 +1,56 @@
+/* game.css */
+
+/*
+   Primarily using Tailwind, but this is for any custom game-specific
+   styles or overrides you might need.
+*/
+
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    /* Background and font handled by Tailwind in game.html */
+}
+
+/* Custom button styles if you want more than Tailwind offers */
+.server-button {
+    /* Example: Add a subtle inner shadow or border here */
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.server-button:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Add any game UI specific styles here, e.g., for canvas, chat, inventory */
+/* For instance, if you're using a <canvas> element for your game world */
+#game-canvas {
+    border: 2px solid #8b5cf6; /* Purple border for the game canvas */
+    border-radius: 15px;
+    background-color: #1a202c; /* Dark background for canvas */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    /* Ensure it's responsive */
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+}
+
+/* Custom scrollbar styling (optional, for aesthetics) */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #4a5568; /* Dark gray for track */
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #8b5cf6; /* Purple for thumb */
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a78bfa; /* Lighter purple on hover */
+}
