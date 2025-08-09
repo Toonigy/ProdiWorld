@@ -1,0 +1,59 @@
+/* style.css */
+
+/*
+   Since Tailwind CSS is loaded, we'll primarily rely on its utility classes
+   in the HTML for styling. This CSS file is provided for any custom
+   styles not easily achieved with Tailwind or for specific overrides.
+*/
+
+/* Basic body styling (can be done with Tailwind as well) */
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    /* Font imported via HTML head link to Google Fonts */
+    /* background-color and layout are handled by Tailwind in index.html */
+}
+
+/* You can add custom animations or specific component styles here if needed */
+/* Example: Custom button hover effects if Tailwind's aren't enough */
+.button-custom-hover:hover {
+    transform: translateY(-2px); /* Slightly lift button on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Add a stronger shadow */
+}
+
+/* You might use this for very specific layout adjustments if Flexbox/Grid in Tailwind isn't precise enough */
+/* For instance, if you wanted a specific background pattern or complex gradient that's easier in CSS */
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Uncomment and customize for a background pattern */
+    /* background-image: url('path/to/your/pattern.png'); */
+    /* background-repeat: repeat; */
+    /* opacity: 0.1; */
+    z-index: -1; /* Ensure it's behind content */
+}
+
+/* Custom scrollbar styling (optional, for aesthetics) */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #4a5568; /* Dark gray for track */
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #8b5cf6; /* Purple for thumb */
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a78bfa; /* Lighter purple on hover */
+}
+
