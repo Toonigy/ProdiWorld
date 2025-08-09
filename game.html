@@ -26,6 +26,53 @@
             margin: 20px auto; /* Center the canvas */
             cursor: pointer; /* Indicate it's clickable */
         }
+        /* Chat box specific styles */
+        #chat-box {
+            height: 200px; /* Fixed height for chat display */
+            overflow-y: auto; /* Enable scrolling */
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 20px;
+            color: #e2e8f0; /* Light text color */
+            font-size: 0.9rem;
+            display: flex; /* Use flex to push messages to bottom */
+            flex-direction: column;
+            justify-content: flex-end; /* Start messages from the bottom */
+        }
+        .chat-message {
+            margin-bottom: 5px;
+            word-wrap: break-word; /* Wrap long words */
+        }
+        .chat-message strong {
+            color: #93c5fd; /* Blue for usernames */
+        }
+        .chat-input-container {
+            display: flex;
+            margin-top: 10px;
+        }
+        .chat-input-container input {
+            flex-grow: 1;
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #4a5568;
+            background-color: #2d3748;
+            color: white;
+            outline: none;
+        }
+        .chat-input-container button {
+            margin-left: 10px;
+            padding: 8px 15px;
+            border-radius: 5px;
+            background-color: #6366f1; /* Indigo */
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .chat-input-container button:hover {
+            background-color: #4f46e5;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 to-black min-h-screen flex flex-col items-center justify-center p-4">
@@ -64,9 +111,26 @@
     <div id="main-area" class="hidden bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-2xl shadow-xl p-8 md:p-12 w-full max-w-4xl border border-gray-700 text-center">
         <h2 class="text-3xl font-bold text-white mb-4">Welcome to <span id="selected-server-name" class="text-purple-400"></span>!</h2>
         <p class="text-gray-300 text-lg">Click anywhere on the game canvas to move your avatar!</p>
-        <div class="mt-8">
-            <canvas id="game-canvas" width="800" height="600"></canvas>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+            <!-- Game Canvas Column -->
+            <div>
+                <canvas id="game-canvas" width="800" height="600"></canvas>
+            </div>
+
+            <!-- Chat System Column -->
+            <div class="flex flex-col">
+                <h3 class="text-2xl font-bold text-white mb-3 text-left">Chat</h3>
+                <div id="chat-box" class="flex-grow">
+                    <!-- Chat messages will be appended here -->
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" id="chat-input" placeholder="Type your message..." class="flex-grow">
+                    <button id="send-chat-button">Send</button>
+                </div>
+            </div>
         </div>
+
         <div class="mt-8 text-white text-left">
             <p>Your User ID: <span id="display-user-id" class="font-mono text-sm text-yellow-300 break-all"></span></p>
             <p>Your Username: <span id="display-username" class="font-medium text-lg text-green-300"></span></p>
