@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const authMessage = document.getElementById('auth-message');
 
     // Get Firebase auth instance from the global window object (set in index.html)
-    const auth = window.firebaseAuth;
+    const auth = window.firebaseAuth; // Correctly referencing the 'auth' instance
 
     /**
      * Displays a message to the user in the auth-message div.
@@ -42,8 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
         displayMessage('Signing up...', false); // Show loading message
 
         try {
-            // Create user with email and password
-            const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+            // Create user with email and password using the 'auth' instance
+            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
             const user = userCredential.user;
             displayMessage(`Signup successful! Welcome, ${user.email}. You can now log in.`, false);
             // Optionally clear fields or redirect
@@ -87,8 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
         displayMessage('Logging in...', false); // Show loading message
 
         try {
-            // Sign in user with email and password
-            const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+            // Sign in user with email and password using the 'auth' instance
+            const userCredential = await auth.signInWithEmailAndPassword(email, password);
             const user = userCredential.user;
             displayMessage(`Login successful! Welcome back, ${user.email}.`, false);
             console.log('User logged in:', user);
@@ -117,4 +117,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-
